@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Priti's Diet Clinic – Insulin Resistance</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Montserrat"; font-weight: 700; src: url("assets/fonts/montserrat-latin-700-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Montserrat"; font-weight: 800; src: url("assets/fonts/montserrat-latin-800-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Montserrat"; font-weight: 900; src: url("assets/fonts/montserrat-latin-900-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Poppins"; font-weight: 500; src: url("assets/fonts/poppins-latin-500-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Poppins"; font-weight: 600; src: url("assets/fonts/poppins-latin-600-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Poppins"; font-weight: 700; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); }
+
+      /* Brand tokens – Priti's Diet Clinic (Colour.png + Logo.png) */
+      :root {
+        --sage: #bde4b5;
+        --leaf: #55bf38;
+        --teal: #4a96b5;
+        --deep: #2f6b4f;
+        --cream: #faf6ee;
+        --blush: #f4d6d2;
+        --yellow: #ffe135;
+        --ink: #1d1d1b;
+        --display: "Montserrat", sans-serif;
+        --body: "Poppins", sans-serif;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--sage); }
+      #root { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--sage); }
+
+      /* ---------- footage (M1 punch-ins scale this wrapper) ---------- */
+      #cam { position: absolute; inset: 0; transform-origin: 590px 850px; }
+      #footage { position: absolute; inset: 0; width: 1080px; height: 1920px; object-fit: cover; }
+
+      .layer { position: absolute; inset: 0; pointer-events: none; }
+      .abs { position: absolute; }
+
+      /* ---------- logo badge ---------- */
+      #badge { left: 44px; top: 196px; width: 96px; height: 96px; border-radius: 50%; background: var(--sage);
+        box-shadow: 0 6px 18px rgba(0,0,0,.18), 0 0 0 4px rgba(255,255,255,.85); display: grid; place-items: center; }
+      #badge img { width: 70px; }
+
+      /* ---------- H1 headline (chest) ---------- */
+      #headline { left: 0; width: 1080px; top: 1338px; text-align: center; }
+      #headline .small { font: 800 54px/1 var(--display); color: #fff; letter-spacing: .04em;
+        text-shadow: 0 3px 0 rgba(0,0,0,.35), 0 6px 22px rgba(0,0,0,.45); }
+      #headline .big { display: inline-block; margin-top: 14px; padding: 10px 26px 12px; background: var(--yellow);
+        color: var(--ink); font: 900 66px/1 var(--display); letter-spacing: .01em; border-radius: 14px;
+        box-shadow: 0 10px 28px rgba(0,0,0,.28); }
+
+      /* ---------- symptom cards (show what I point to) ---------- */
+      .sym { width: 340px; padding: 10px; background: #fff; border-radius: 28px;
+        box-shadow: 0 18px 40px rgba(0,0,0,.28); opacity: 0; }
+      .sym img { display: block; width: 320px; height: 350px; object-fit: cover; border-radius: 20px; }
+      .sym .num { position: absolute; top: -18px; width: 58px; height: 58px; border-radius: 50%;
+        background: linear-gradient(160deg, var(--leaf), var(--teal)); color: #fff; display: grid; place-items: center;
+        font: 900 30px/1 var(--display); box-shadow: 0 6px 14px rgba(0,0,0,.25); border: 4px solid #fff; }
+      .sym.right { left: 702px; top: 196px; }
+      .sym.right .num { left: -20px; }
+      .sym.left { left: 36px; top: 520px; }
+      .sym.left .num { right: -20px; }
+
+      /* ---------- B3 tick list ---------- */
+      #ticks { left: 652px; top: 206px; width: 396px; padding: 24px 26px 18px; background: var(--cream);
+        border-radius: 26px; box-shadow: 0 16px 36px rgba(0,0,0,.25); border: 3px solid var(--sage); opacity: 0; }
+      #ticks h4 { font: 800 28px/1.1 var(--display); color: var(--deep); letter-spacing: .06em; margin-bottom: 14px; }
+      #ticks .row { display: flex; align-items: center; gap: 16px; font: 600 31px/1.15 var(--body); color: var(--ink); margin: 10px 0; }
+      #ticks .box { flex: none; width: 40px; height: 40px; border-radius: 12px; border: 3px solid var(--deep);
+        position: relative; background: #fff; }
+      #ticks .box svg { position: absolute; inset: -2px; width: 40px; height: 40px; }
+      #ticks .box path { fill: none; stroke: var(--leaf); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round;
+        stroke-dasharray: 40; stroke-dashoffset: 40; }
+
+      /* ---------- captions (verbatim) + C2 / B6 treatments ---------- */
+      #caps { left: 60px; width: 960px; top: 1150px; height: 170px; }
+      .cap { position: absolute; inset: 0; display: flex; flex-wrap: wrap; justify-content: center; align-content: center;
+        gap: 0 18px; opacity: 0; }
+      .cap .w { font: 800 62px/1.15 var(--display); color: #fff; text-transform: uppercase;
+        text-shadow: 0 3px 0 rgba(0,0,0,.45), 0 0 18px rgba(0,0,0,.45); }
+      .cap .w.big { font-size: 112px; font-weight: 900; color: var(--yellow); line-height: 1; }
+      .cap.c2 { flex-direction: column; align-items: center; gap: 0; }
+      .cap.c2 .line1 { display: flex; gap: 0 14px; }
+      .cap.c2 .line1 .w { font-size: 46px; font-weight: 700; }
+      .cap.c2 .line2 { display: flex; gap: 0 22px; }
+      .cap.c2 .line2 .w { font-size: 76px; font-weight: 900; white-space: nowrap; }
+      .cap.c2 .line2 .w + .w { margin-left: 24px; }
+      .cap.c2 .line1 .w + .w { margin-left: 4px; }
+
+      /* ---------- paper cards (read caption / E1 save) ---------- */
+      .paper { background: var(--cream); border-radius: 30px; box-shadow: 0 22px 50px rgba(0,0,0,.30);
+        border: 3px solid #fff; opacity: 0; }
+      .paper::before { content: ""; position: absolute; inset: 10px; border-radius: 22px; border: 2px dashed rgba(47,107,79,.28); }
+      #readcard { left: 190px; width: 700px; top: 1356px; height: 150px; display: flex; align-items: center; justify-content: center; gap: 22px; }
+      #readcard .t { font: 900 52px/1 var(--display); color: var(--ink); }
+      #readcard .t b { background: var(--yellow); padding: 2px 12px; border-radius: 10px; }
+      #readcard svg { width: 54px; height: 54px; }
+
+      #savecard { left: 110px; width: 860px; top: 1300px; height: 248px; padding: 26px 36px; }
+      #savecard .top { display: flex; align-items: center; gap: 22px; }
+      #savecard .bm { width: 74px; height: 92px; flex: none; transform-origin: 50% 0; }
+      #savecard .title { font: 900 64px/1 var(--display); color: var(--ink); letter-spacing: .01em; }
+      #savecard .title span { background: var(--yellow); padding: 0 12px; border-radius: 10px; }
+      #savecard .cta { margin-top: 16px; font: 700 33px/1.25 var(--body); color: var(--deep); opacity: 0; }
+      #savecard .cta2 { margin-top: 4px; font: 600 28px/1.25 var(--body); color: #5b5b55; opacity: 0; }
+
+      /* ---------- end brand ---------- */
+      #endbrand { left: 290px; width: 500px; top: 210px; height: 330px; display: flex; flex-direction: column; align-items: center;
+        justify-content: center; background: rgba(250,246,238,.94); border-radius: 36px; box-shadow: 0 18px 40px rgba(0,0,0,.22); opacity: 0; }
+      #endbrand .disc { width: 170px; height: 170px; border-radius: 50%; background: var(--sage); display: grid; place-items: center; }
+      #endbrand .disc img { width: 124px; }
+      #endbrand .name { margin-top: 16px; font: 800 40px/1 var(--display); color: var(--deep); letter-spacing: .02em; }
+      #endbrand .handle { margin-top: 8px; font: 600 30px/1 var(--body); color: var(--teal); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="19.1" data-width="1080" data-height="1920" data-fps="30">
+      <!-- Graded, gap-trimmed, upscaled footage (built by ../prepare_footage.sh from source/Priti_Reel_2_original.mp4) -->
+      <div id="cam">
+        <video id="footage" class="clip" src="assets/footage.mp4" data-start="0" data-duration="19.1" data-media-start="0"
+          data-has-audio="true" data-volume="1" data-track-index="0" playsinline></video>
+      </div>
+
+      <!-- S1 light ticks: synthesised, kept ≥18 dB under the voice -->
+      <audio id="sfx-w0" src="assets/sfx/whoosh.wav" data-start="0.02" data-duration="0.45" data-volume="0.10" data-track-index="2"></audio>
+      <audio id="sfx-p1" src="assets/sfx/pop.wav" data-start="1.50" data-duration="0.12" data-volume="0.12" data-track-index="2"></audio>
+      <audio id="sfx-p2" src="assets/sfx/pop.wav" data-start="3.00" data-duration="0.12" data-volume="0.12" data-track-index="2"></audio>
+      <audio id="sfx-p3" src="assets/sfx/pop.wav" data-start="4.29" data-duration="0.12" data-volume="0.12" data-track-index="2"></audio>
+      <audio id="sfx-p4" src="assets/sfx/pop.wav" data-start="5.62" data-duration="0.12" data-volume="0.12" data-track-index="2"></audio>
+      <audio id="sfx-t1" src="assets/sfx/tick.wav" data-start="7.34" data-duration="0.05" data-volume="0.14" data-track-index="3"></audio>
+      <audio id="sfx-t2" src="assets/sfx/tick.wav" data-start="7.62" data-duration="0.05" data-volume="0.14" data-track-index="3"></audio>
+      <audio id="sfx-t3" src="assets/sfx/tick.wav" data-start="7.90" data-duration="0.05" data-volume="0.14" data-track-index="3"></audio>
+      <audio id="sfx-t4" src="assets/sfx/tick.wav" data-start="8.16" data-duration="0.05" data-volume="0.14" data-track-index="3"></audio>
+      <audio id="sfx-w1" src="assets/sfx/whoosh.wav" data-start="10.22" data-duration="0.45" data-volume="0.10" data-track-index="2"></audio>
+      <audio id="sfx-w2" src="assets/sfx/whoosh.wav" data-start="13.80" data-duration="0.45" data-volume="0.10" data-track-index="2"></audio>
+      <audio id="sfx-pa" src="assets/sfx/paper.wav" data-start="15.10" data-duration="0.35" data-volume="0.14" data-track-index="3"></audio>
+      <audio id="sfx-p5" src="assets/sfx/pop.wav" data-start="15.76" data-duration="0.12" data-volume="0.12" data-track-index="2"></audio>
+      <audio id="sfx-p6" src="assets/sfx/pop.wav" data-start="16.76" data-duration="0.12" data-volume="0.12" data-track-index="2"></audio>
+      <audio id="sfx-w3" src="assets/sfx/whoosh.wav" data-start="17.0" data-duration="0.45" data-volume="0.10" data-track-index="2"></audio>
+
+      <div class="layer">
+        <div id="badge" class="abs"><img src="assets/images/logo-mark.png" alt="Priti's Diet Clinic logo" /></div>
+
+        <!-- Symptom cards: placed on the side Priti points to, above her hand -->
+        <div id="sym1" class="sym right abs"><div class="num">1</div><img src="assets/images/dark-neck.jpg" alt="Dark neck" /></div>
+        <div id="sym2" class="sym left abs"><div class="num">2</div><img src="assets/images/skin-tags.jpg" alt="Skin tags" /></div>
+        <div id="sym3" class="sym right abs"><div class="num">3</div><img src="assets/images/belly-fat.jpg" alt="Belly fat around the waist" /></div>
+        <div id="sym4" class="sym left abs"><div class="num">4</div><img src="assets/images/sugar-cravings.jpg" alt="Sugar cravings" /></div>
+
+        <div id="ticks" class="abs">
+          <h4>CHECK YOUR SIGNS</h4>
+          <div class="row"><div class="box"><svg viewBox="0 0 40 40"><path d="M9 21 l7 7 l15 -16"/></svg></div>Dark neck</div>
+          <div class="row"><div class="box"><svg viewBox="0 0 40 40"><path d="M9 21 l7 7 l15 -16"/></svg></div>Skin tags</div>
+          <div class="row"><div class="box"><svg viewBox="0 0 40 40"><path d="M9 21 l7 7 l15 -16"/></svg></div>Belly fat</div>
+          <div class="row"><div class="box"><svg viewBox="0 0 40 40"><path d="M9 21 l7 7 l15 -16"/></svg></div>Sugar cravings</div>
+        </div>
+
+        <div id="headline" class="abs">
+          <div class="small">4 SIGNS OF</div>
+          <div class="big">INSULIN RESISTANCE</div>
+        </div>
+
+        <div id="caps" class="abs"></div>
+
+        <div id="readcard" class="paper abs">
+          <div class="t">READ THE <b>CAPTION</b></div>
+          <svg viewBox="0 0 54 54"><circle cx="27" cy="27" r="25" fill="#55bf38"/><path d="M27 14 v24 M17 29 l10 10 l10 -10" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+
+        <div id="savecard" class="paper abs">
+          <div class="top">
+            <svg class="bm" viewBox="0 0 74 92"><path d="M8 4 h58 a4 4 0 0 1 4 4 v80 l-33 -22 l-33 22 v-80 a4 4 0 0 1 4 -4z" fill="#55bf38"/><path d="M24 34 l9 9 l17 -18" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div class="title"><span>SAVE</span> THIS REEL</div>
+          </div>
+          <div class="cta">FOLLOW @PRITISDIETCLINIC</div>
+          <div class="cta2">Share with someone who needs this</div>
+        </div>
+
+        <div id="endbrand" class="abs">
+          <div class="disc"><img src="assets/images/logo-mark.png" alt="" /></div>
+          <div class="name">PRITI'S DIET CLINIC</div>
+          <div class="handle">@pritisdietclinic</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Caption groups on the edited timeline. Words are Priti's exact speech (never rewritten).
+      // [start, end, kind, words[[text, t, flag]]]  flag: "big" = B6 word / C2 keyword, "hl" = yellow highlight
+      const CAPS = [
+        [7.08, 7.88, "plain", [["If", 7.12], ["you", 7.34], ["have", 7.48], ["more", 7.62]]],
+        [7.88, 8.84, "plain", [["than", 7.90], ["TWO", 8.16, "big"], ["of", 8.44], ["these", 8.68]]],
+        [8.84, 9.66, "plain", [["symptoms,", 8.88, "hl"]]],
+        [9.66, 11.45, "c2", [["then", 9.70], ["you", 9.78], ["can", 9.90], ["be", 10.12], ["insulin", 10.30, "big"], ["resistant.", 10.70, "big"]]],
+        [11.50, 12.48, "plain", [["If", 11.58], ["you", 11.72], ["want", 11.88], ["to", 12.08], ["know", 12.24]]],
+        [12.48, 13.82, "plain", [["more", 12.52], ["about", 12.86], ["this,", 13.18]]],
+        [13.86, 14.86, "plain", [["READ", 13.90, "big"], ["my", 14.20], ["caption", 14.46, "hl"]]],
+        [14.86, 15.70, "plain", [["and", 14.88], ["kindly", 15.44]]],
+        [15.70, 16.24, "plain", [["FOLLOW", 15.76, "big"], ["me", 16.06]]],
+        [16.24, 17.70, "plain", [["for", 16.28], ["more", 16.46], ["science-backed", 16.76, "hl"]]],
+        [17.70, 18.50, "plain", [["options.", 17.74]]]
+      ];
+
+      const capsEl = document.getElementById("caps");
+      const tl = gsap.timeline({ paused: true });
+
+      // ---------- build captions ----------
+      CAPS.forEach((g, gi) => {
+        const [s, e, kind, words] = g;
+        const box = document.createElement("div");
+        box.className = "cap" + (kind === "c2" ? " c2" : "");
+        box.id = "cap" + gi;
+        let l1, l2;
+        if (kind === "c2") {
+          l1 = document.createElement("div"); l1.className = "line1";
+          l2 = document.createElement("div"); l2.className = "line2";
+          box.append(l1, l2);
+        }
+        const spans = words.map(([txt, t, flag]) => {
+          const sp = document.createElement("span");
+          sp.className = "w" + (flag === "big" && kind !== "c2" ? " big" : "");
+          sp.textContent = txt;
+          if (kind === "c2") (flag === "big" ? l2 : l1).appendChild(sp); else box.appendChild(sp);
+          return [sp, t, flag];
+        });
+        capsEl.appendChild(box);
+        tl.fromTo(box, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.16, ease: "power2.out" }, s - 0.04);
+        spans.forEach(([sp, t, flag]) => {
+          if (flag === "big") {
+            // B6 big turn word / C2 keyword: punchy but professional
+            tl.fromTo(sp, { opacity: 0, scale: 0.4, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: 0.32, ease: "back.out(2.2)" }, t - 0.06);
+            if (kind === "c2") tl.set(sp, { color: "#ffe135" }, t - 0.06);
+          } else {
+            tl.fromTo(sp, { opacity: 0.35 }, { opacity: 1, duration: 0.08 }, t - 0.05);
+            tl.to(sp, { color: flag === "hl" ? "#ffe135" : "#ffffff", duration: 0.08 }, t - 0.05);
+          }
+        });
+        tl.to(box, { autoAlpha: 0, duration: 0.12, ease: "power1.in" }, e - 0.1);
+      });
+
+      // ---------- M1 punch-in cuts (cuts at 4.29, 5.62, 11.45 are masked by a scale change) ----------
+      tl.fromTo("#cam", { scale: 1.0 }, { scale: 1.05, duration: 0.7, ease: "power2.out" }, 0);
+      tl.set("#cam", { scale: 1.0 }, 4.29);
+      tl.set("#cam", { scale: 1.05 }, 5.62);
+      tl.to("#cam", { scale: 1.0, duration: 0.5, ease: "power2.inOut" }, 7.02);
+      tl.to("#cam", { scale: 1.05, duration: 0.45, ease: "power2.out" }, 10.25);
+      tl.set("#cam", { scale: 1.0 }, 11.45);
+      tl.to("#cam", { scale: 1.04, duration: 0.5, ease: "power2.out" }, 13.84);
+      tl.to("#cam", { scale: 1.0, duration: 0.8, ease: "power2.inOut" }, 18.1);
+
+      // ---------- H1 headline: complete from frame 0, gentle pulse on each "insulin resistance" ----------
+      [0.12, 1.60, 3.08, 4.31, 5.66].forEach((t) => {
+        tl.to("#headline .big", { scale: 1.05, duration: 0.14, ease: "power2.out" }, t);
+        tl.to("#headline .big", { scale: 1.0, duration: 0.3, ease: "power2.inOut" }, t + 0.14);
+      });
+      tl.to("#headline", { autoAlpha: 0, y: 30, duration: 0.25, ease: "power2.in" }, 13.62);
+
+      // ---------- show-what-I-point-to symptom cards ----------
+      const SYMS = [["#sym1", 1.48, 3.0], ["#sym2", 3.0, 4.29], ["#sym3", 4.29, 5.62], ["#sym4", 5.62, 7.04]];
+      SYMS.forEach(([id, s, e]) => {
+        tl.fromTo(id, { opacity: 0, scale: 0.6, y: 60, rotation: id === "#sym1" || id === "#sym3" ? 6 : -6 },
+          { opacity: 1, scale: 1, y: 0, rotation: id === "#sym1" || id === "#sym3" ? 2 : -2, duration: 0.38, ease: "back.out(1.8)" }, s);
+        tl.to(id, { y: -10, duration: (e - s) - 0.55, ease: "sine.inOut" }, s + 0.38);
+        tl.to(id, { opacity: 0, scale: 0.85, duration: 0.14, ease: "power1.in" }, e - 0.15);
+      });
+
+      // ---------- B3 tick list ----------
+      tl.fromTo("#ticks", { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, 7.05);
+      [7.34, 7.62, 7.90, 8.16].forEach((t, i) => {
+        tl.to(`#ticks .row:nth-of-type(${i + 1}) path`, { strokeDashoffset: 0, duration: 0.22, ease: "power2.out" }, t);
+        tl.fromTo(`#ticks .row:nth-of-type(${i + 1}) .box`, { scale: 1 }, { scale: 1.18, duration: 0.1, yoyo: true, repeat: 1 }, t);
+      });
+      tl.to("#ticks", { opacity: 0, x: 60, duration: 0.25, ease: "power2.in" }, 11.2);
+
+      // ---------- read-the-caption card ----------
+      tl.fromTo("#readcard", { opacity: 0, y: 40, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(1.6)" }, 13.84);
+      tl.to("#readcard svg", { y: 8, duration: 0.25, yoyo: true, repeat: 3, ease: "sine.inOut" }, 14.2);
+      tl.to("#readcard", { opacity: 0, y: 20, duration: 0.18 }, 15.0);
+
+      // ---------- E1 save card + CTA ----------
+      tl.fromTo("#savecard", { opacity: 0, y: 70, rotation: -2.5 }, { opacity: 1, y: 0, rotation: 0, duration: 0.45, ease: "back.out(1.4)" }, 15.12);
+      tl.fromTo("#savecard .bm", { scaleY: 0.2, opacity: 0 }, { scaleY: 1, opacity: 1, duration: 0.35, ease: "back.out(2)" }, 15.3);
+      tl.to("#savecard .bm", { rotation: -8, duration: 0.18, yoyo: true, repeat: 3, ease: "sine.inOut" }, 15.5);
+      tl.fromTo("#savecard .cta", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.25 }, 15.74);
+      tl.fromTo("#savecard .cta2", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.25 }, 16.74);
+
+      // ---------- end brand (Priti stays on screen; never black) ----------
+      tl.to("#badge", { opacity: 0, duration: 0.2 }, 17.0);
+      tl.fromTo("#endbrand", { opacity: 0, scale: 0.85, y: 20 }, { opacity: 1, scale: 1, y: 0, duration: 0.45, ease: "back.out(1.6)" }, 17.05);
+
+      tl.set({}, {}, 19.1);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

@@ -1,33 +1,46 @@
-# Priti Reel 2 – "Signs of Insulin Resistance" – Editing Plan (v1, awaiting approval)
+# Priti Reel 2 – "4 Signs of Insulin Resistance" – Storyboard v2
 
-Status: PLAN ONLY – nothing rendered yet.
+Status: **draft preview built (`export/PREVIEW_draft_not_final.mp4`). Final MP4 waits for Priti's approval.**
 
-## Source analysis
-- File: Priti_Reel_2.mp4 – 20.17 s, portrait (stored 1024×576, rotated −90° → 576×1024), 30 fps, AAC audio.
-- Resolution is 576×1024, so it has to be upscaled 1.875× to 1080×1920. It will look slightly soft, and punch-ins are capped at 106% for that reason.
-- Framing: Priti seated in a brown office chair in a red outfit, certificates on a cream wall above her. Face sits at roughly y 320–640 px (1080×1920 space), and there is free wall space at the top-left and top-right.
-- Transcript (word-timed, faster-whisper small):
-  - 0.00–7.22  "Insulin resistance" ×5 (one per gesture: points up-left, then right, up-left, right, up-left)
-  - 7.22–11.90 "If you have more than two of these symptoms, then you can be insulin resistant."
-  - 11.90–19.04 "If you want to know more about this, read my caption and kindly follow me for more science-backed options."
-- Pauses to tighten: ~0.8 s before "you" @7.2, ~0.8 s @11.9–12.76, ~0.4 s @14.1–14.5, ~0.5 s @15.84–16.42. Total ≈ 2 s. No words are cut.
+## Folder layout
+- `source/` – untouched original video and the original GitHub symptom images
+- `prepare_footage.sh` – trims silent gaps only, voice loudness → −14 LUFS, G1 grade, 576×1024 → 1080×1920 upscale
+- `make_sfx.py` – synthesises the soft pop / tick / whoosh / paper sounds (no licensing issues)
+- `project/` – editable HyperFrames project (`index.html` = composition; HTML/CSS/GSAP)
+- `export/` – rendered videos
 
-## Brand
-- Sage #BDE4B5 (Colour.png), logo gradient leaf green #55BF38 → teal-blue #4A96B5, cream #FAF6EE card base, blush #F4D6D2 accent, yellow #FFE135 only for keyword highlights.
-- Canva "5 Snacks…" design: bold black sans text on a yellow highlight bar, 1080×1920, centred title at the top.
-- Logo: Logo.png (leaf/tree mark). The background square will be cut out to a transparent PNG.
+## Source
+- 20.17 s, portrait 576×1024, 30 fps. Exact speech (verified with two Whisper models):
+  1. "Insulin resistance" ×5 – pointing right, left, right, left in turns
+  2. "If you have more than two of these symptoms, then you can be insulin resistant."
+  3. "If you want to know more about this, read my caption and kindly follow me for more science-backed options."
+- Silent gaps removed (no words cut): 0.00–0.18, 4.47–4.72, 6.05–6.32, 12.15–12.51 → **final 19.1 s**
 
-## Storyboard (times = edited timeline)
-See chat / PR description for the table. It is repeated below.
+## Timeline (edited seconds)
+| Time | Speech | Styles | On screen |
+|---|---|---|---|
+| 0.00–1.48 | "Insulin resistance" (hook) | H1, M1 | Full headline from frame 1 on chest: "4 SIGNS OF" white / "INSULIN RESISTANCE" black on yellow bar. Punch-in 100→105 %. Logo badge top-left. Headline pulses on each "insulin resistance". |
+| 1.48–3.00 | "Insulin resistance" (points right) | Pointing image, S1 pop | ① Dark Neck card, top-right |
+| 3.00–4.29 | "Insulin resistance" (points left) | Pointing image | ② Skin Tags card, top-left above her raised finger |
+| 4.29–5.62 | "Insulin resistance" (points right) | Pointing image, M1 cut | ③ Belly Fat card, top-right |
+| 5.62–7.04 | "Insulin resistance" (points left) | Pointing image, M1 cut | ④ Sugar Cravings card, top-left |
+| 7.05–11.20 | "If you have more than two of these symptoms…" | B3, B6, C2, captions | "CHECK YOUR SIGNS" cream checklist (top-right) ticks 1-2-3-4. B6: big yellow **TWO**. C2: small "THEN YOU CAN BE" + big yellow "INSULIN RESISTANT." |
+| 11.45 | – | M1 | Jump cut hidden by scale change |
+| 11.50–13.82 | "If you want to know more about this," | captions | – |
+| 13.84–15.00 | "read my caption" | B6, paper card | Big yellow **READ**; "READ THE CAPTION ↓" paper card replaces headline |
+| 15.12–19.10 | "and kindly follow me for more science-backed options." | E1, CTA, B6 | SAVE THIS REEL paper card with animated bookmark → "FOLLOW @PRITISDIETCLINIC" (15.74) → "Share with someone who needs this" (16.74). Big yellow **FOLLOW**. |
+| 17.05–19.10 | (end) | Branding | Logo + PRITI'S DIET CLINIC + @pritisdietclinic card above her head. She stays on screen; no black frames. |
 
-| # | Edited time | Source | Speech | Styles | On-screen |
-|---|---|---|---|---|---|
-| 1 | 0.0–1.1 | 0.00–1.08 | "Insulin resistance" | H1, M1, C2-label, pointing image | Headline (whole reel). Symptom 1 card top-left above her raised finger |
-| 2 | 1.1–2.8 | 1.08–2.82 | "Insulin resistance" | pointing image, S1 pop | Symptom 2 card top-right (she points right) |
-| 3 | 2.8–4.3 | 2.82–4.26 | "Insulin resistance" | pointing image, M1 | Symptom 3 top-left |
-| 4 | 4.3–5.9 | 4.26–5.90 | "Insulin resistance" | pointing image | Symptom 4 top-right |
-| 5 | 5.9–7.2 | 5.90–7.22 | "Insulin resistance" | pointing image | Symptom 5 top-left |
-| 6 | 7.2–11.1 | 7.22–11.90 (pause trimmed) | "If you have more than two…insulin resistant" | M1, B3 tick list, B6 "2+" | Checklist card on the right with 5 ticks; B6 word below her face; C2 at "insulin resistant" |
-| 7 | 11.1–15.3 | 11.90–15.84 (pauses trimmed) | "If you want to know more… read my caption" | M1, B6 "READ THE CAPTION", S1 | Paper card with a ↓ arrow |
-| 8 | 15.3–18.2 | 16.42–19.04 | "and kindly follow me … options" | E1 Save card, CTA, logo | SAVE THIS REEL card + FOLLOW @PRITISDIETCLINIC + SHARE line + logo |
-| 9 | 18.2–19.0 | 19.04–20.17 | (silence) | end hold | Brand sign-off over her last frame (never black) |
+## Look and sound
+- Brand: sage #BDE4B5, leaf #55BF38 → teal #4A96B5, cream #FAF6EE, yellow #FFE135 (keywords only). Montserrat 700–900 + Poppins 500–700.
+- G1: slight warmth (colorbalance), +3 % contrast, −4 % saturation so the red outfit doesn't glow, light lanczos sharpen. No smoothing or filters.
+- S1: pops on symptom cards, ticks on checklist, whoosh on C2/READ/end card, paper swish on Save card. Measured mix: voice −13.7 LUFS, peaks −1.4 dBFS; effects add 0 dB to voice peaks.
+- Music: none (only licensed tracks Priti supplies).
+
+## Safe zones
+All text and cards sit between y ≈ 196 and y ≈ 1548 (1080×1920), inside the Reels/TikTok UI-free area. No overlay covers the face (≈ x 400–780, y 580–1120).
+
+## To render the final after approval
+```
+cd project && npx hyperframes check && npx hyperframes render -q delivery -o ../export/Pritis_Insulin_Resistance_Reel.mp4
+```

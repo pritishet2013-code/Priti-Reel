@@ -1,6 +1,6 @@
-"""Step 2: graphics + punch-ins + SFX on top of build/cut.mov -> output reel.
+"""Step 3: graphics + punch-ins + SFX on top of build/clean.mkv -> output reel.
 
-Styles: H1 headline, C2 captions, B1 step tracker, B3 tick list, B6 big turn word,
+Styles: H1 headline, C2 captions, B3 tick list, B6 big turn word,
 E1 save card + end card, M1 punch-in cuts, S1 light ticks (generated SFX).
 Layout keeps every element inside the 1080x1920 TikTok/Reels safe zone
 (x 60-960, y 210-1500) and out of the face zone.
@@ -118,56 +118,50 @@ def paste(base, im, xy, alpha=1.0, scale=1.0, anchor="tl"):
     base.alpha_composite(im, (int(x), int(y)))
 
 # ---------- static assets ----------
-def make_logo(size=104):
-    lg = Image.open(os.path.join(ROOT, "Logo.png")).convert("RGB")
-    leaf = lg.crop((560, 440, 1450, 1560))           # leaf mark on mint
-    leaf.thumbnail((size - 22, size - 22), Image.LANCZOS)
-    tile = rounded((size, size), 24, MINT + (255,))
-    tile.alpha_composite(leaf.convert("RGBA"), ((size - leaf.width) // 2, (size - leaf.height) // 2))
-    border = rounded((size + 6, size + 6), 27, WHITE + (255,))
-    border.alpha_composite(tile, (3, 3))
-    return shadowed(border, blur=8, offset=(0, 4), alpha=90)[0]
+PHOTO_W, PHOTO_H = 500, 386          # bigger symptom photos (all same frame)
+CARD_TOP = 222                       # card spans y 222-628: above the forehead
+
+def hd_photo(asset):
+    """Real-ESRGAN 4x upscale of the symptom crop (cached), then cover-crop to the frame."""
+    cache = os.path.join(BUILD, "hd_" + asset)
+    if not os.path.exists(cache):
+        import onnxruntime as ort
+        sess = ort.InferenceSession(os.path.join(BUILD, "models", "esrgan.onnx"),
+                                    providers=["CPUExecutionProvider"])
+        im = Image.open(os.path.join(HERE, "assets", asset)).convert("RGB")
+        x = (np.asarray(im, np.float32) / 255).transpose(2, 0, 1)[None]
+        y = sess.run(None, {"input": x})[0][0].transpose(1, 2, 0).clip(0, 1)
+        Image.fromarray((y * 255 + 0.5).astype(np.uint8)).save(cache)
+    im = Image.open(cache).convert("RGB")
+    s = max(PHOTO_W / im.width, PHOTO_H / im.height)
+    im = im.resize((round(im.width * s), round(im.height * s)), Image.LANCZOS)
+    l, t = (im.width - PHOTO_W) // 2, (im.height - PHOTO_H) // 2
+    return im.crop((l, t, l + PHOTO_W, t + PHOTO_H))
 
 def make_symptom_card(i):
     asset, label, _, _ = SYMPTOMS[i]
-    photo = Image.open(os.path.join(HERE, "assets", asset)).convert("RGB")
-    pw = 336
-    photo = photo.resize((pw, int(photo.height * pw / photo.width)), Image.LANCZOS)
-    cw, pad = pw + 20, 10
-    f = fit_font(label, "InterDisplay-ExtraBold.otf", 30, cw - 96)
-    lab_h = 54
-    card = rounded((cw, lab_h + photo.height + pad * 2), 22, WHITE + (255,))
-    d = ImageDraw.Draw(card)
-    # label strip
-    strip = rounded((cw - pad * 2, lab_h - 6), 14, MINT + (255,))
-    card.alpha_composite(strip, (pad, pad))
-    d.text((cw // 2 + 24, pad + (lab_h - 6) // 2), label, font=f, fill=DEEP, anchor="mm")
-    # number badge (brand gradient)
-    badge = gradient((40, 40), GREEN, TEAL)
-    m = Image.new("L", (40, 40), 0); ImageDraw.Draw(m).ellipse([0, 0, 39, 39], fill=255)
-    badge.putalpha(m)
-    ImageDraw.Draw(badge).text((20, 20), str(i + 1), font=font("InterDisplay-Black.otf", 24),
-                               fill=WHITE, anchor="mm")
-    card.alpha_composite(badge, (pad + 7, pad + 4))
-    # photo with rounded corners
+    photo = hd_photo(asset)
+    pad = 10
+    cw, ch = PHOTO_W + pad * 2, PHOTO_H + pad * 2
+    card = rounded((cw, ch), 26, WHITE + (255,))
     pm = Image.new("L", photo.size, 0)
-    ImageDraw.Draw(pm).rounded_rectangle([0, 0, photo.width - 1, photo.height - 1], 14, fill=255)
+    ImageDraw.Draw(pm).rounded_rectangle([0, 0, photo.width - 1, photo.height - 1], 18, fill=255)
     ph = photo.convert("RGBA"); ph.putalpha(pm)
-    card.alpha_composite(ph, (pad, lab_h + pad - 2))
+    card.alpha_composite(ph, (pad, pad))
+    # label bar over the bottom of the photo
+    bh = 64
+    bar = rounded((PHOTO_W - 24, bh), 18, MINT + (240,))
+    card.alpha_composite(bar, (pad + 12, pad + PHOTO_H - bh - 12))
+    d = ImageDraw.Draw(card)
+    f = fit_font(label, "InterDisplay-ExtraBold.otf", 36, PHOTO_W - 110)
+    d.text((cw // 2 + 22, pad + PHOTO_H - 12 - bh // 2), label, font=f, fill=DEEP, anchor="mm")
+    badge = gradient((46, 46), GREEN, TEAL)
+    m = Image.new("L", (46, 46), 0); ImageDraw.Draw(m).ellipse([0, 0, 45, 45], fill=255)
+    badge.putalpha(m)
+    ImageDraw.Draw(badge).text((23, 23), str(i + 1), font=font("InterDisplay-Black.otf", 28),
+                               fill=WHITE, anchor="mm")
+    card.alpha_composite(badge, (pad + 22, pad + PHOTO_H - 12 - bh // 2 - 23))
     return shadowed(card)
-
-def make_tracker_pill(label, state, w=138, h=50):
-    if state == "done":
-        pill = gradient((w, h), GREEN, TEAL); fg = WHITE
-    elif state == "now":
-        pill = Image.new("RGBA", (w, h), YELLOW + (255,)); fg = DEEP
-    else:
-        pill = Image.new("RGBA", (w, h), (255, 255, 255, 170)); fg = (60, 90, 70)
-    m = Image.new("L", (w, h), 0); ImageDraw.Draw(m).rounded_rectangle([0, 0, w - 1, h - 1], h // 2, fill=255)
-    pill.putalpha(m)
-    f = fit_font(label, "InterDisplay-Bold.otf", 24, w - 16)
-    ImageDraw.Draw(pill).text((w // 2, h // 2), label, font=f, fill=fg, anchor="mm")
-    return pill
 
 def make_tick_card(n_ticked, flash=None):
     cw, row = 330, 62
@@ -193,7 +187,7 @@ def make_tick_card(n_ticked, flash=None):
         d.text((64, cy), label.title(), font=f, fill=(DEEP if on else (90, 110, 95)), anchor="lm")
     return shadowed(card)[0]
 
-def make_paper_card(lines, size=(560, 250), with_logo=False):
+def make_paper_card(lines, size=(560, 250)):
     """E1 paper card: off-white paper, mint tape, handwritten + clean lines."""
     w, h = size
     card = Image.new("RGBA", (w, h), PAPER + (255,))
@@ -208,9 +202,7 @@ def make_paper_card(lines, size=(560, 250), with_logo=False):
     for y in range(78, h - 20, 44):  # faint ruled lines
         d.line([(28, y), (w - 28, y)], fill=(200, 225, 205, 255), width=2)
     x0 = 30
-    if with_logo:
-        lg = make_logo(84); card.alpha_composite(lg, (16, (h - lg.height) // 2)); x0 = 128
-    y = 30 if not with_logo else (h - sum(l[2] + 10 for l in lines)) // 2
+    y = (h - sum(l[2] + 10 for l in lines)) // 2 + 6
     for txt, fnt, lh, col in lines:
         d.text((x0 + (w - x0 - 24) // 2, y + lh // 2), txt, font=fnt, fill=col, anchor="mm")
         y += lh + 10
@@ -242,7 +234,6 @@ def make_c2(small_txt, big_txt, big_col):
     im.alpha_composite(b, ((im.width - b.width) // 2, s.height - 30))
     return im
 
-LOGO = make_logo()
 CARDS = [make_symptom_card(i) for i in range(5)]
 HEADLINE = make_headline()
 TURN = text_img("2+", font("InterDisplay-Black.otf", 210), YELLOW, 9)
@@ -255,7 +246,7 @@ SAVE_CARD = make_paper_card([
 END_CARD = make_paper_card([
     ("Follow for more", CAV, 62, DEEP),
     ("simple health tips", CAV, 62, DEEP),
-], size=(600, 210), with_logo=True)
+], size=(600, 210))
 
 # C2 caption chunks (start, end, small line, big word, big colour)
 CAPS = [
@@ -295,21 +286,7 @@ def apply_zoom(frame, z):
 
 def overlay(t):
     ov = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    paste(ov, LOGO, (52, 214))  # top-left, inside safe zone
-
-    # B1 tracker + symptom cards (intro) ------------------------------
-    trk_a = window(t, -1.0, S2_END - 0.05, fin=0.01, fout=0.25)
-    if trk_a > 0:
-        cur = seg_index(t) if t < INTRO_END else 5
-        x = 196
-        for i, (_, _, short, _) in enumerate(SYMPTOMS):
-            state = "done" if i < cur else ("now" if i == cur else "todo")
-            pill = make_tracker_pill(short, state)
-            sc = 1.0
-            if state == "now":
-                sc = 1.0 + 0.08 * (1 - ease_out((t - SEG[i]) / 0.25))
-            paste(ov, pill, (x + 69, 240 + 25), alpha=trk_a, scale=sc, anchor="c")
-            x += 150
+    # symptom cards above the pointing finger --------------------------
     for i in range(5):
         a0, a1 = SEG[i] + 0.04, SEG[i + 1] - 0.06
         al = window(t, a0, a1, fin=0.16, fout=0.08)
@@ -317,8 +294,8 @@ def overlay(t):
         card, pad = CARDS[i]
         sc = 0.82 + 0.18 * ease_back((t - a0) / 0.24)
         side = SYMPTOMS[i][3]
-        cx = 200 + card.width // 2 - pad if side == "L" else 940 - card.width // 2 + pad
-        paste(ov, card, (cx, 296 - pad + (card.height) // 2), alpha=al, scale=sc, anchor="c")
+        cx = 64 + card.width // 2 - pad if side == "L" else 956 - card.width // 2 + pad
+        paste(ov, card, (cx, CARD_TOP - pad + card.height // 2), alpha=al, scale=sc, anchor="c")
 
     # H1 headline on the chest from frame one ---------------------------
     ha = window(t, -1.0, INTRO_END - 0.02, fin=0.001, fout=0.15)
@@ -392,7 +369,7 @@ def build_sfx(path):
 
 # ---------- main ----------
 def frames_in():
-    p = subprocess.Popen(["ffmpeg", "-v", "error", "-i", os.path.join(BUILD, "cut.mov"),
+    p = subprocess.Popen(["ffmpeg", "-v", "error", "-i", os.path.join(BUILD, "clean.mkv"),
                           "-f", "rawvideo", "-pix_fmt", "rgb24", "-"], stdout=subprocess.PIPE)
     while True:
         buf = p.stdout.read(W * H * 3)
@@ -416,11 +393,11 @@ def main():
     enc = subprocess.Popen([
         "ffmpeg", "-v", "error", "-y",
         "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
-        "-i", os.path.join(BUILD, "cut.mov"), "-i", sfx,
+        "-i", os.path.join(BUILD, "voice.wav"), "-i", sfx,
         "-filter_complex", "[1:a][2:a]amix=inputs=2:duration=first:normalize=0,"
                            "alimiter=limit=0.89[a]",
         "-map", "0:v", "-map", "[a]",
-        "-c:v", "libx264", "-preset", "slow", "-crf", "17", "-pix_fmt", "yuv420p",
+        "-c:v", "libx264", "-preset", "slow", "-crf", "15", "-pix_fmt", "yuv420p",
         "-profile:v", "high", "-movflags", "+faststart",
         "-c:a", "aac", "-b:a", "192k", "-shortest", out], stdin=subprocess.PIPE)
     for n, fr in enumerate(frames_in()):

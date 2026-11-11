@@ -37,6 +37,41 @@ def background():
     k = np.clip(1 - d, 0, 1)[..., None] ** 1.5
     return MINT * (1 - k) + MINT_LIGHT * k
 
+def keep_main_body(a):
+    """Drop stray islands (chair bits, specks): keep the body and any big connected part."""
+    hard = (a > 0.3).astype(np.uint8)
+    n, lab, stats, _ = cv2.connectedComponentsWithStats(hard, connectivity=8)
+    if n <= 2: return a
+    areas = stats[1:, cv2.CC_STAT_AREA]
+    big = areas.max()
+    keep = np.isin(lab, 1 + np.where(areas >= 0.05 * big)[0]).astype(np.uint8)
+    keep = cv2.dilate(keep, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (25, 25)))
+    keep = cv2.GaussianBlur(keep.astype(np.float32), (0, 0), 4)
+    return a * keep
+
+def matte(im, mod, seg, prev_a):
+    m_in = np.asarray(im.resize((512, 896), Image.BILINEAR), np.float32).transpose(2, 0, 1)[None] / 127.5 - 1
+    a_mod = mod.run(None, {"input": m_in})[0][0, 0]
+    s_in = (np.asarray(im.resize((256, 256), Image.BILINEAR), np.float32) / 255)[None]
+    logits = seg.run(None, {seg.get_inputs()[0].name: s_in})[0][0]
+    e = np.exp(logits - logits.max(-1, keepdims=True)); prob = e / e.sum(-1, keepdims=True)
+    person = 1 - prob[..., 0]
+    a_mod = cv2.resize(a_mod, (W, H), interpolation=cv2.INTER_CUBIC)
+    a_mod = np.clip((a_mod - 0.12) / 0.78, 0, 1)          # kill faint background residue
+    p = cv2.resize(person.astype(np.float32), (SW, SH), interpolation=cv2.INTER_LINEAR)
+    hard = (p > 0.5).astype(np.uint8)
+    gate = cv2.dilate(hard, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (13, 13)))
+    gate = cv2.GaussianBlur(gate.astype(np.float32), (0, 0), 3)
+    core = cv2.erode(hard, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (19, 19))).astype(np.float32)
+    core = cv2.GaussianBlur(core, (0, 0), 2)
+    gate = cv2.resize(gate, (W, H), interpolation=cv2.INTER_LINEAR)
+    core = cv2.resize(core, (W, H), interpolation=cv2.INTER_LINEAR)
+    a = np.maximum(a_mod * gate, core)                     # fill holes inside the body
+    if prev_a is not None:                                  # temporal smoothing
+        a = 0.7 * a + 0.3 * prev_a
+    return keep_main_body(a)
+
+
 def main():
     fetch()
     so = ort.SessionOptions(); so.intra_op_num_threads = 4
@@ -68,25 +103,7 @@ def main():
         fg = ai * ESRGAN_MIX + lz * (1 - ESRGAN_MIX)
 
         # --- matte
-        m_in = np.asarray(im.resize((512, 896), Image.BILINEAR), np.float32).transpose(2, 0, 1)[None] / 127.5 - 1
-        a_mod = mod.run(None, {"input": m_in})[0][0, 0]
-        s_in = (np.asarray(im.resize((256, 256), Image.BILINEAR), np.float32) / 255)[None]
-        logits = seg.run(None, {seg.get_inputs()[0].name: s_in})[0][0]
-        e = np.exp(logits - logits.max(-1, keepdims=True)); prob = e / e.sum(-1, keepdims=True)
-        person = 1 - prob[..., 0]
-        a_mod = cv2.resize(a_mod, (W, H), interpolation=cv2.INTER_CUBIC)
-        a_mod = np.clip((a_mod - 0.12) / 0.78, 0, 1)          # kill faint background residue
-        p = cv2.resize(person.astype(np.float32), (SW, SH), interpolation=cv2.INTER_LINEAR)
-        hard = (p > 0.5).astype(np.uint8)
-        gate = cv2.dilate(hard, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (13, 13)))
-        gate = cv2.GaussianBlur(gate.astype(np.float32), (0, 0), 3)
-        core = cv2.erode(hard, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (19, 19))).astype(np.float32)
-        core = cv2.GaussianBlur(core, (0, 0), 2)
-        gate = cv2.resize(gate, (W, H), interpolation=cv2.INTER_LINEAR)
-        core = cv2.resize(core, (W, H), interpolation=cv2.INTER_LINEAR)
-        a = np.maximum(a_mod * gate, core)                     # fill holes inside the body
-        if prev_a is not None:                                  # temporal smoothing
-            a = 0.7 * a + 0.3 * prev_a
+        a = matte(im, mod, seg, prev_a)
         prev_a = a
 
         # light wrap: tint the outer edge a touch toward the background

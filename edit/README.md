@@ -8,6 +8,7 @@ Rebuild (Python 3, ffmpeg; `pip install onnxruntime opencv-python-headless<5 noi
 2. Transcribe `edit/build/voice.wav` to `edit/build/words.json` (faster-whisper medium, word timestamps).
 3. `python3 edit/enhance.py` — Real-ESRGAN 4x upscale to 1080x1920 and background removal
    (MODNet edges gated by a MediaPipe person mask) onto the brand mint background. ~45 min on 4 CPUs.
+   (`python3 edit/cleanup.py` repairs an older clean.mkv by removing stray matte islands; not needed after a fresh enhance.py run.)
 4. `python3 edit/render.py` — graphics, punch-ins, generated SFX, final encode.
    `python3 edit/render.py --preview 0.3,8.2` writes stills to `edit/build/preview/`.
 

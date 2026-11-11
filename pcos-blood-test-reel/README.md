@@ -1,6 +1,6 @@
 # PCOS Edition – Symptoms vs Blood Tests (Instagram Reel)
 
-Final video: `output/PCOS_Blood_Tests_Reel.mp4` (1080×1920, 9:16, 30 fps, H.264/AAC, ~17 s).
+Final video: `output/PCOS_Blood_Tests_Reel.mp4` (1080×1920, 9:16, 30 fps, H.264/AAC, ~21.5 s: 17 s of presenter footage, then a 4.5 s closing call-to-action screen).
 
 Modelled on `../Reference for blood test reel.mp4`: a heading at the top, two column labels, a dotted
 divider, and each symptom on the left with its blood tests on the right. Branded with the
@@ -14,6 +14,15 @@ heading `#D93D7A`.
 | 2 Jawline acne, facial hair | 4.55 s | 6.50 s |
 | 3 Hair thinning | 8.55 s | 10.75 s |
 | 4 Constant fatigue, joint pain, inflammation | 12.75 s | 14.70 s |
+
+## Closing CTA screen (16.95 s to 21.5 s)
+A cream background with sage and blush shapes is revealed with a circular wipe, then three cards appear in turn:
+1. **SAVE THIS REEL**: a bookmark drops in, fills with pink and sparkles.
+2. **FOLLOW @PRITISDIETCLINIC**: a "+" badge pops in and the card gets a tap.
+3. **Share with someone who needs this**: a paper plane flies in.
+
+## Symptom images
+These are the photos you supplied, in `composition/images/`: `periods.jpg`, `jawline-acne.jpg`, `hair-thinning.jpg` and `joint-pain.jpg`.
 
 ## Files
 - `source/Raw_Video_2.mp4`: an untouched copy of the original raw video.

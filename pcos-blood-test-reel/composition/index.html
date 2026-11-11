@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PCOS Edition – Blood Tests</title>
+<!--
+  Overlay composition for the "PCOS EDITION – Symptoms vs Blood Tests" reel.
+  Canvas: 1080x1920 (9:16). Rendered frame-by-frame (30 fps) with a transparent
+  background by scripts/render-overlay.mjs, then composited over the presenter
+  video by scripts/build.sh.
+  Open with ?preview=1 to see it over the source video in a browser.
+-->
+<style>
+  @font-face { font-family: Poppins; font-weight: 500; font-style: normal; src: url(vendor/fonts/poppins-latin-500-normal.woff2) format("woff2"); }
+  @font-face { font-family: Poppins; font-weight: 600; font-style: normal; src: url(vendor/fonts/poppins-latin-600-normal.woff2) format("woff2"); }
+  @font-face { font-family: Poppins; font-weight: 600; font-style: italic; src: url(vendor/fonts/poppins-latin-600-italic.woff2) format("woff2"); }
+  @font-face { font-family: Poppins; font-weight: 700; font-style: normal; src: url(vendor/fonts/poppins-latin-700-normal.woff2) format("woff2"); }
+  @font-face { font-family: Poppins; font-weight: 800; font-style: normal; src: url(vendor/fonts/poppins-latin-800-normal.woff2) format("woff2"); }
+  @font-face { font-family: Poppins; font-weight: 800; font-style: italic; src: url(vendor/fonts/poppins-latin-800-italic.woff2) format("woff2"); }
+  @font-face { font-family: Poppins; font-weight: 900; font-style: italic; src: url(vendor/fonts/poppins-latin-900-italic.woff2) format("woff2"); }
+
+  /* Priti's Diet Clinic palette: cream, sage green, blush pink */
+  :root {
+    --cream: #FFF8EE;
+    --sage: #BDE5B5;        /* brand sage (Colour.png) */
+    --sage-deep: #5E8F5A;
+    --blush: #F7C8D4;
+    --rose: #D93D7A;        /* hot blush-pink for the heading */
+    --ink: #1D2421;
+  }
+  html, body { margin: 0; padding: 0; background: transparent; }
+  body { width: 1080px; height: 1920px; overflow: hidden; position: relative; font-family: Poppins, sans-serif; color: var(--ink); }
+  #bgvideo { position: absolute; inset: 0; width: 1080px; height: 1920px; object-fit: cover; display: none; }
+  .preview #bgvideo { display: block; }
+
+  /* ---------- Heading ---------- */
+  #title {
+    position: absolute; top: 205px; left: 0; width: 1080px; text-align: center;
+    font-weight: 900; font-style: italic; font-size: 96px; letter-spacing: 1px; line-height: 1;
+    color: var(--rose);
+    -webkit-text-stroke: 10px #fff; paint-order: stroke fill;
+    filter: drop-shadow(0 6px 10px rgba(120, 30, 70, .25));
+  }
+  #title .swash {
+    display: block; margin: 10px auto 0; width: 300px; height: 12px; border-radius: 12px;
+    background: linear-gradient(90deg, var(--sage), var(--blush));
+    transform-origin: center;
+  }
+
+  /* ---------- Column labels + divider ---------- */
+  .label {
+    position: absolute; top: 365px; transform: translateX(-50%);
+    background: #fff; color: #000; font-weight: 800; font-size: 34px; letter-spacing: 1.5px;
+    padding: 8px 26px; border-radius: 6px; text-transform: uppercase; white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(0,0,0,.14), inset 0 -5px 0 var(--sage);
+  }
+  #labelL { left: 270px; }
+  #labelR { left: 810px; }
+  #divider { position: absolute; left: 538px; top: 350px; width: 4px; height: 360px; transform-origin: top; }
+
+  /* ---------- Symptom (left column) ---------- */
+  .symptom { position: absolute; left: 40px; top: 448px; width: 460px; text-align: center; }
+  .symptom .txt {
+    font-weight: 700; font-size: 38px; line-height: 1.2; color: var(--ink);
+    text-shadow: 0 0 12px rgba(255,255,255,.9);
+  }
+  .symptom .txt .w { display: inline-block; white-space: pre; }
+  .symptom .hl {
+    position: absolute; left: 50%; bottom: -10px; width: 200px; height: 10px; margin-left: -100px;
+    border-radius: 10px; background: var(--sage); transform-origin: left;
+  }
+  .pic {
+    position: absolute; left: 165px; top: 600px; width: 200px; height: 200px;
+    border-radius: 26px; overflow: hidden; background: var(--cream);
+    border: 6px solid #fff; box-shadow: 0 10px 26px rgba(0,0,0,.22);
+  }
+  #p4 { top: 625px; }
+  .pic svg { width: 100%; height: 100%; display: block; }
+
+  /* ---------- Tests (right column) ---------- */
+  .tests { position: absolute; left: 575px; top: 448px; width: 470px; margin: 0; padding: 0; list-style: none; }
+  .tests li {
+    display: flex; align-items: center; gap: 12px; height: 41px;
+    font-weight: 600; font-size: 29px; line-height: 1; color: var(--ink); white-space: nowrap;
+    text-shadow: 0 0 10px rgba(255,255,255,.95);
+  }
+  .tests li .n {
+    flex: none; width: 30px; height: 30px; border-radius: 50%;
+    background: var(--rose); color: #fff; font-size: 18px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; text-shadow: none;
+  }
+  .tests li.note { font-style: italic; font-weight: 600; font-size: 24px; color: var(--sage-deep); }
+  .tests li.note .n { background: var(--sage); color: var(--ink); }
+  .tests li small { font-size: 22px; font-weight: 500; font-style: italic; color: #4b5650; margin-left: 4px; }
+</style>
+</head>
+<body>
+<video id="bgvideo" src="../source/Raw_Video_2.mp4" muted playsinline></video>
+
+<div id="title">PCOS EDITION<span class="swash"></span></div>
+<div class="label" id="labelL">Symptoms</div>
+<div class="label" id="labelR">Blood Tests</div>
+<svg id="divider" viewBox="0 0 4 360" preserveAspectRatio="none">
+  <line x1="2" y1="0" x2="2" y2="360" stroke="#111" stroke-width="4" stroke-dasharray="10 9" stroke-linecap="round"/>
+</svg>
+
+<!-- ===== Step 1 ===== -->
+<div class="symptom" id="s1"><div class="txt">Irregular or|missed periods</div><div class="hl"></div></div>
+<div class="pic" id="p1">
+  <!-- calendar with skipped cycle -->
+  <svg viewBox="0 0 200 200">
+    <rect width="200" height="200" fill="#FFF8EE"/>
+    <rect x="28" y="40" width="144" height="128" rx="14" fill="#fff" stroke="#E3D9CC" stroke-width="3"/>
+    <rect x="28" y="40" width="144" height="34" rx="14" fill="#BDE5B5"/>
+    <rect x="28" y="60" width="144" height="14" fill="#BDE5B5"/>
+    <rect x="58" y="30" width="8" height="22" rx="4" fill="#5E8F5A"/>
+    <rect x="134" y="30" width="8" height="22" rx="4" fill="#5E8F5A"/>
+    <g fill="#E7DED2">
+      <circle cx="50" cy="92" r="7"/><circle cx="75" cy="92" r="7"/><circle cx="100" cy="92" r="7"/><circle cx="125" cy="92" r="7"/><circle cx="150" cy="92" r="7"/>
+      <circle cx="50" cy="117" r="7"/><circle cx="75" cy="117" r="7"/><circle cx="125" cy="117" r="7"/><circle cx="150" cy="117" r="7"/>
+      <circle cx="50" cy="142" r="7"/><circle cx="75" cy="142" r="7"/><circle cx="100" cy="142" r="7"/><circle cx="150" cy="142" r="7"/>
+    </g>
+    <path d="M100 106 C100 106 91 117 91 122 a9 9 0 0 0 18 0 C109 117 100 106 100 106Z" fill="#D93D7A"/>
+    <circle cx="125" cy="142" r="11" fill="none" stroke="#D93D7A" stroke-width="3" stroke-dasharray="4 3"/>
+    <text x="125" y="148" text-anchor="middle" font-family="Poppins" font-weight="800" font-size="16" fill="#D93D7A">?</text>
+    <g transform="translate(150 150)">
+      <circle r="24" fill="#F7C8D4" stroke="#fff" stroke-width="4"/>
+      <path d="M-9 -9 L9 9 M9 -9 L-9 9" stroke="#D93D7A" stroke-width="5" stroke-linecap="round"/>
+    </g>
+  </svg>
+</div>
+<ul class="tests" id="t1">
+  <li><span class="n">1</span>LH</li>
+  <li><span class="n">2</span>FSH</li>
+  <li><span class="n">3</span>Progesterone</li>
+  <li><span class="n">4</span>Prolactin</li>
+</ul>
+
+<!-- ===== Step 2 ===== -->
+<div class="symptom" id="s2"><div class="txt">Jawline acne,|facial hair</div><div class="hl"></div></div>
+<div class="pic" id="p2">
+  <!-- close-up: jawline with acne + chin hair -->
+  <svg viewBox="0 0 200 200">
+    <rect width="200" height="200" fill="#F7E3DA"/>
+    <path d="M200 0 L118 0 C104 30 96 58 100 86 C104 112 84 126 70 140 C58 152 56 170 72 182 C92 196 130 196 158 184 C178 176 196 160 200 150 Z" fill="#D9A07C"/>
+    <path d="M200 150 C190 168 170 182 150 188 L200 200 Z" fill="#C88E6B"/>
+    <path d="M103 64 C112 70 112 80 103 84" fill="none" stroke="#B97E5C" stroke-width="3" stroke-linecap="round"/>
+    <g fill="#C8445A" opacity=".9">
+      <circle cx="96" cy="150" r="5"/><circle cx="114" cy="162" r="4"/><circle cx="132" cy="150" r="5.5"/>
+      <circle cx="150" cy="166" r="4"/><circle cx="120" cy="138" r="3.5"/><circle cx="160" cy="146" r="4.5"/><circle cx="142" cy="176" r="3.5"/>
+    </g>
+    <g fill="#F6B3B9" opacity=".7">
+      <circle cx="96" cy="150" r="9"/><circle cx="132" cy="150" r="9"/><circle cx="160" cy="146" r="8"/>
+    </g>
+    <g stroke="#3A2A22" stroke-width="2.2" stroke-linecap="round">
+      <path d="M78 170 l-3 7"/><path d="M86 176 l-2 8"/><path d="M96 180 l0 8"/><path d="M106 182 l1 8"/>
+      <path d="M84 162 l-4 6"/><path d="M118 184 l2 7"/><path d="M74 158 l-5 5"/>
+    </g>
+    <circle cx="44" cy="52" r="30" fill="#fff" stroke="#BDE5B5" stroke-width="6"/>
+    <circle cx="44" cy="52" r="8" fill="#C8445A"/><circle cx="44" cy="52" r="15" fill="#F6B3B9" opacity=".6"/>
+    <path d="M66 74 L84 92" stroke="#5E8F5A" stroke-width="9" stroke-linecap="round"/>
+  </svg>
+</div>
+<ul class="tests" id="t2">
+  <li><span class="n">1</span>Total testosterone</li>
+  <li><span class="n">2</span>Free testosterone</li>
+  <li><span class="n">3</span>SHBG</li>
+  <li><span class="n">4</span>DHEA-S</li>
+  <li><span class="n">5</span>Prolactin</li>
+  <li><span class="n">6</span>LH &amp; FSH</li>
+  <li class="note"><span class="n">+</span>Others, per clinical assessment</li>
+</ul>
+
+<!-- ===== Step 3 ===== -->
+<div class="symptom" id="s3"><div class="txt">Hair thinning</div><div class="hl"></div></div>
+<div class="pic" id="p3">
+  <!-- top-of-head view: widened parting -->
+  <svg viewBox="0 0 200 200">
+    <rect width="200" height="200" fill="#FFF8EE"/>
+    <ellipse cx="100" cy="108" rx="80" ry="86" fill="#2E211C"/>
+    <path d="M100 26 C92 70 90 120 100 192 C110 120 108 70 100 26Z" fill="#E1AE8C"/>
+    <ellipse cx="100" cy="104" rx="22" ry="40" fill="#E1AE8C" opacity=".85"/>
+    <g fill="none" stroke="#4A372F" stroke-width="2" stroke-linecap="round" opacity=".9">
+      <path d="M92 40 C70 70 58 110 60 160"/><path d="M86 52 C62 84 46 120 46 158"/><path d="M80 40 C50 66 34 104 34 140"/>
+      <path d="M108 40 C130 70 142 110 140 160"/><path d="M114 52 C138 84 154 120 154 158"/><path d="M120 40 C150 66 166 104 166 140"/>
+    </g>
+    <g stroke="#5A463C" stroke-width="1.6" stroke-linecap="round" opacity=".7">
+      <path d="M96 80 l-6 6"/><path d="M104 92 l6 5"/><path d="M95 112 l-7 4"/><path d="M105 124 l7 4"/><path d="M97 140 l-6 6"/>
+    </g>
+    <g fill="none" stroke="#2E211C" stroke-width="2.4" stroke-linecap="round">
+      <path d="M150 178 c8 -6 14 -2 22 -8"/><path d="M28 182 c10 -2 14 4 24 0"/>
+    </g>
+    <circle cx="160" cy="38" r="18" fill="#F7C8D4"/>
+    <path d="M160 28 v14 M160 47 v2" stroke="#D93D7A" stroke-width="5" stroke-linecap="round"/>
+  </svg>
+</div>
+<ul class="tests" id="t3">
+  <li><span class="n">1</span>Ferritin / Iron studies</li>
+  <li><span class="n">2</span>TSH</li>
+  <li><span class="n">3</span>Vitamin B12</li>
+  <li><span class="n">4</span>Vitamin D</li>
+  <li><span class="n">5</span>Zinc <small>(if clinically indicated)</small></li>
+</ul>
+
+<!-- ===== Step 4 ===== -->
+<div class="symptom" id="s4"><div class="txt">Constant fatigue,|joint pain,|inflammation</div><div class="hl"></div></div>
+<div class="pic" id="p4">
+  <!-- low battery + inflamed knee joint -->
+  <svg viewBox="0 0 200 200">
+    <rect width="200" height="200" fill="#FFF8EE"/>
+    <g transform="translate(22 28)">
+      <rect x="0" y="0" width="92" height="46" rx="10" fill="#fff" stroke="#1D2421" stroke-width="5"/>
+      <rect x="94" y="14" width="8" height="18" rx="3" fill="#1D2421"/>
+      <rect x="8" y="8" width="16" height="30" rx="4" fill="#D93D7A"/>
+      <text x="56" y="31" text-anchor="middle" font-family="Poppins" font-weight="800" font-size="16" fill="#D93D7A">LOW</text>
+    </g>
+    <text x="150" y="52" font-family="Poppins" font-weight="800" font-size="24" fill="#5E8F5A">z</text>
+    <text x="164" y="36" font-family="Poppins" font-weight="800" font-size="18" fill="#5E8F5A">z</text>
+    <text x="176" y="24" font-family="Poppins" font-weight="800" font-size="13" fill="#5E8F5A">z</text>
+    <!-- leg with knee -->
+    <path d="M30 196 C44 160 60 132 92 118 L112 112 C130 108 146 120 152 136 C160 156 168 178 172 200 Z" fill="#D9A07C"/>
+    <path d="M30 196 C44 160 60 132 92 118" fill="none" stroke="#C88E6B" stroke-width="4"/>
+    <circle cx="118" cy="128" r="30" fill="#F06A7E" opacity=".35"/>
+    <circle cx="118" cy="128" r="18" fill="#E8485F" opacity=".55"/>
+    <g stroke="#D93D7A" stroke-width="5" stroke-linecap="round">
+      <path d="M118 86 v-10"/><path d="M150 98 l7 -7"/><path d="M86 98 l-7 -7"/><path d="M162 128 h10"/><path d="M74 128 h-10"/>
+    </g>
+  </svg>
+</div>
+<ul class="tests" id="t4">
+  <li><span class="n">1</span>hs-CRP <small>(if indicated)</small></li>
+  <li><span class="n">2</span>Vitamin D</li>
+  <li><span class="n">3</span>CBC</li>
+  <li class="note"><span class="n">+</span>Others, based on symptoms</li>
+</ul>
+
+<script src="vendor/gsap.min.js"></script>
+<script>
+  // Split symptom text into words for kinetic reveal
+  document.querySelectorAll('.symptom .txt').forEach(el => {
+    el.innerHTML = el.textContent.split('|')
+      .map(line => line.trim().split(' ').map(w => `<span class="w">${w}</span>`).join(' '))
+      .join('<br>');
+  });
+
+  const DURATION = 16.95;
+  const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
+  window.__SFX = [];           // times of "pop" sound effects, read by the build
+  const sfx = t => window.__SFX.push(+t.toFixed(3));
+
+  // Base state: everything hidden
+  gsap.set(['.symptom', '.pic', '.tests li'], { autoAlpha: 0 });
+
+  // --- Intro: heading pop-in, labels, divider draw ---
+  tl.fromTo('#title', { scale: 0.4, autoAlpha: 0, rotation: -4 }, { scale: 1, autoAlpha: 1, rotation: 0, duration: 0.55, ease: 'back.out(2.2)' }, 0.05);
+  tl.fromTo('#title .swash', { scaleX: 0 }, { scaleX: 1, duration: 0.5 }, 0.35);
+  tl.fromTo('#labelL', { autoAlpha: 0, y: -24, scale: .8 }, { autoAlpha: 1, y: 0, scale: 1, duration: 0.4, ease: 'back.out(2)' }, 0.25);
+  tl.fromTo('#labelR', { autoAlpha: 0, y: -24, scale: .8 }, { autoAlpha: 1, y: 0, scale: 1, duration: 0.4, ease: 'back.out(2)' }, 0.35);
+  tl.fromTo('#divider', { scaleY: 0 }, { scaleY: 1, duration: 0.6, ease: 'power2.inOut' }, 0.3);
+  sfx(0.08);
+
+  // Steps timed to the presenter's pointing gestures:
+  //   left hand up  -> symptom appears on the left
+  //   right hand up -> blood tests appear on the right
+  const steps = [
+    { id: 1, sym: 0.80, test: 2.30, out: 4.30 },
+    { id: 2, sym: 4.55, test: 6.50, out: 8.35 },
+    { id: 3, sym: 8.55, test: 10.75, out: 12.50 },
+    { id: 4, sym: 12.75, test: 14.70, out: null },
+  ];
+
+  steps.forEach(s => {
+    const S = `#s${s.id}`, P = `#p${s.id}`, T = `#t${s.id} li`;
+    // symptom words rise in with a soft blur
+    tl.set(S, { autoAlpha: 1 }, s.sym);
+    tl.fromTo(`${S} .w`, { autoAlpha: 0, y: 26, filter: 'blur(6px)' },
+      { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.38, stagger: 0.06 }, s.sym);
+    tl.fromTo(`${S} .hl`, { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: 'power2.out' }, s.sym + 0.2);
+    sfx(s.sym);
+    // illustration pops up toward the raised finger
+    tl.fromTo(P, { autoAlpha: 0, scale: 0.55, y: 40, rotation: -8 },
+      { autoAlpha: 1, scale: 1, y: 0, rotation: -3, duration: 0.5, ease: 'back.out(1.8)' }, s.sym + 0.18);
+    tl.to(P, { y: -6, rotation: 2, duration: 1.6, ease: 'sine.inOut', yoyo: true, repeat: 1 }, s.sym + 0.7);
+    // tests drop in line by line
+    const n = document.querySelectorAll(T).length;
+    const gap = n > 5 ? 0.13 : 0.17;
+    tl.fromTo(T, { autoAlpha: 0, x: 40 }, { autoAlpha: 1, x: 0, duration: 0.32, stagger: gap }, s.test);
+    tl.fromTo(`#t${s.id} li .n`, { scale: 0 }, { scale: 1, duration: 0.3, stagger: gap, ease: 'back.out(3)' }, s.test + 0.05);
+    for (let i = 0; i < n; i++) sfx(s.test + i * gap);
+    // clear out before the next symptom
+    if (s.out !== null) {
+      tl.to([S, P], { autoAlpha: 0, y: -18, duration: 0.25, ease: 'power2.in' }, s.out);
+      tl.to(T, { autoAlpha: 0, x: 24, duration: 0.22, stagger: 0.02, ease: 'power2.in' }, s.out);
+      tl.set([S, P], { y: 0 }, s.out + 0.3);
+    }
+  });
+  tl.set({}, {}, DURATION);
+
+  // Hooks for the renderer / previewer
+  window.__DURATION = DURATION;
+  window.__seek = t => { tl.seek(t, false); };
+  window.__ready = document.fonts.ready.then(() => true);
+
+  if (new URLSearchParams(location.search).has('preview')) {
+    document.body.classList.add('preview');
+    const v = document.getElementById('bgvideo');
+    v.addEventListener('loadeddata', () => { v.play(); tl.play(0); });
+    v.addEventListener('timeupdate', () => { if (Math.abs(tl.time() - v.currentTime) > 0.08) tl.seek(v.currentTime); });
+  }
+</script>
+</body>
+</html>
